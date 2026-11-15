@@ -1,0 +1,28 @@
+[project]
+name = "be-project-ax1"
+version = "0.1.0"
+description = "KANT 백엔드 과제 - FastAPI 게시판 API (PostgreSQL, SQLAlchemy, JWT)"
+readme = "README.md"
+authors = [
+    { name = "tuski0", email = "tuski0@naver.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "asyncpg>=0.32.0",
+    "bcrypt>=5.0.0",
+    "fastapi>=0.163.0",
+    "greenlet>=3.5.6",
+    "pydantic[email]>=2.14.3",
+    "pyjwt>=2.15.1",
+    "python-dotenv>=1.2.4",
+    "python-multipart>=0.0.33",
+    "sqlalchemy>=2.1.8",
+    "uvicorn>=0.54.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+package = false
