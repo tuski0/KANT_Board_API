@@ -192,12 +192,12 @@ uv run --with httpx python scripts/smoke_test.py http://localhost:8000
 PostgreSQL은 EC2 안에서 Docker 컨테이너로 실행하고, FastAPI는 같은 EC2에서 uv로 실행합니다.
 
 ```bash
-# 1) .env 작성 (POSTGRES_PASSWORD 와 DATABASE_URL 의 비밀번호를 같은 값으로)
+# 1) .env 작성 (DATABASE_URL 은 docker-compose.yaml 의 계정 admin / qwer1234 / DB board 와 맞춤)
 cp .env.example .env
 
-# 2) PostgreSQL 컨테이너 실행 (127.0.0.1:5432 에만 열림, 외부에서 DB 직접 접속 불가)
+# 2) PostgreSQL 컨테이너 실행 (5432 포트)
 docker compose up -d
-docker compose ps          # STATUS 가 healthy 인지 확인
+docker compose ps          # STATUS 가 Up 인지 확인
 
 # 3) API 서버 실행
 uv sync
