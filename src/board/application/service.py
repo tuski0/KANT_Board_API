@@ -1,5 +1,3 @@
-import uuid
-
 from board.domain.board import Authority, Board
 from board.domain.enums import PostSearchType, Role
 from board.domain.post import Author, Comment, Post
@@ -136,7 +134,7 @@ class PostService:
         post_id: int,
         title: str,
         content: str,
-        requester_id: uuid.UUID,
+        requester_id: int,
         user_role: Role,
     ) -> Post:
         post = await self._get_active_post(post_id)
@@ -151,7 +149,7 @@ class PostService:
         post.update_content(title=title, content=content)
         return await self._post_repo.save(post)
 
-    async def delete_post(self, post_id: int, requester_id: uuid.UUID, user_role: Role) -> None:
+    async def delete_post(self, post_id: int, requester_id: int, user_role: Role) -> None:
         post = await self._get_active_post(post_id)
         board = await self._get_active_board(post.board_info.board_id)
 
@@ -219,7 +217,7 @@ class CommentService:
         self,
         comment_id: int,
         content: str,
-        requester_id: uuid.UUID,
+        requester_id: int,
         user_role: Role,
     ) -> Comment:
         comment = await self._get_active_comment(comment_id)
@@ -235,7 +233,7 @@ class CommentService:
         comment.update_content(content=content)
         return await self._comment_repo.save(comment)
 
-    async def delete_comment(self, comment_id: int, requester_id: uuid.UUID, user_role: Role) -> None:
+    async def delete_comment(self, comment_id: int, requester_id: int, user_role: Role) -> None:
         comment = await self._get_active_comment(comment_id)
         post = await self._get_active_post(comment.post_id)
         board = await self._get_active_board(post.board_info.board_id)

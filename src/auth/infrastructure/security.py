@@ -23,7 +23,7 @@ class JwtTokenProvider(TokenProvider):
         self.algorithm = algorithm
         self.expire_minutes = access_token_expire_minutes
 
-    def create_access_token(self, user_id: uuid.UUID) -> tuple[str, str, datetime, int]:
+    def create_access_token(self, user_id: int) -> tuple[str, str, datetime, int]:
         now = datetime.now(timezone.utc)
         expires_delta = timedelta(minutes=self.expire_minutes)
         expired_at = now + expires_delta
@@ -43,7 +43,7 @@ class JwtTokenProvider(TokenProvider):
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return TokenPayload(
-                user_id=uuid.UUID(payload["sub"]),
+                user_id=int(payload["sub"]),  # sub 는 문자열 → 정수로 변환
                 jti=payload["jti"],
                 exp=datetime.fromtimestamp(payload["exp"], tz=timezone.utc),
             )

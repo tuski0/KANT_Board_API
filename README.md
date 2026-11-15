@@ -59,12 +59,12 @@ erDiagram
     posts ||--o{ comments : "포함"
 
     users {
-        uuid id PK
+        bigint id PK "자동 증가"
         varchar email UK
         varchar name
         varchar password_hash
         varchar role "USER | ADMIN"
-        boolean resign
+        varchar status "ACTIVE | WITHDRAWN"
     }
     boards {
         varchar id PK "free, notice ..."
@@ -82,14 +82,14 @@ erDiagram
         varchar title
         text content
         varchar author_name
-        uuid author_id FK "NOT NULL"
+        bigint author_id FK "NOT NULL"
     }
     comments {
         bigint id PK
         bigint post_id FK
         text content
         varchar author_name
-        uuid author_id FK "NOT NULL"
+        bigint author_id FK "NOT NULL"
     }
     token_blacklist {
         varchar jti PK
@@ -97,7 +97,9 @@ erDiagram
     }
 ```
 
-`token_blacklist`를 뺀 모든 테이블에 `created_at`, `modified_at`, `deleted_at`(소프트 삭제)이 있습니다. 컬럼별 상세 설명은 [docs/ERD.md](docs/ERD.md)에 있습니다.
+- 모든 PK는 DB 자동 증가 정수(`BIGINT`)입니다. 단, `boards.id`는 URL에 쓰는 문자열(`free` 등), `token_blacklist.jti`는 토큰마다 무작위로 만드는 UUID 문자열입니다.
+- 회원 탈퇴는 `status`를 `WITHDRAWN`으로 바꾸고 `deleted_at`을 기록합니다.
+- `token_blacklist`를 뺀 모든 테이블에 `created_at`, `modified_at`, `deleted_at`(소프트 삭제)이 있습니다. 컬럼별 상세 설명은 [docs/ERD.md](docs/ERD.md)에 있습니다.
 
 ## 4. API 명세
 

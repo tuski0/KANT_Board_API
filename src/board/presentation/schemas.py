@@ -1,4 +1,3 @@
-import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -103,7 +102,7 @@ class PostSearchQuery(BaseModel):
 
 class AuthorResponse(BaseModel):
     """작성자 정보 응답"""
-    author_id: uuid.UUID = Field(description="작성 회원 ID")
+    author_id: int = Field(description="작성 회원 ID")
     author_name: str = Field(description="작성자 이름")
 
 

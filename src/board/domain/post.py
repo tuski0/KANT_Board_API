@@ -1,4 +1,3 @@
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -23,7 +22,7 @@ class BoardInfo:
 @dataclass(frozen=True)
 class Author:
     """작성자(회원) 정보 값 객체"""
-    author_id: uuid.UUID
+    author_id: int
     author_name: str
 
     def __post_init__(self):
@@ -44,16 +43,16 @@ class Author:
             )
 
     @classmethod
-    def member(cls, user_id: uuid.UUID, username: str) -> "Author":
+    def member(cls, user_id: int, username: str) -> "Author":
         """회원 작성자 생성"""
         return cls(author_id=user_id, author_name=username.strip())
 
-    def is_owner(self, user_id: uuid.UUID | None) -> bool:
+    def is_owner(self, user_id: int | None) -> bool:
         """로그인 사용자가 작성자 본인인지 검증"""
         return user_id is not None and self.author_id == user_id
 
 
-def _can_modify(author: Author, requester_id: uuid.UUID | None, user_role: Role | None) -> bool:
+def _can_modify(author: Author, requester_id: int | None, user_role: Role | None) -> bool:
     """수정/삭제 권한: 관리자 → 작성자 본인 순으로 확인"""
     if user_role == Role.ADMIN:
         return True
@@ -139,7 +138,7 @@ class Post:
             raise BadRequestException("이미 삭제된 게시글입니다.")
         self.deleted_at = datetime.now(timezone.utc)
 
-    def can_modify_or_delete(self, requester_id: uuid.UUID | None, user_role: Role | None) -> bool:
+    def can_modify_or_delete(self, requester_id: int | None, user_role: Role | None) -> bool:
         return _can_modify(self.author, requester_id, user_role)
 
 
@@ -200,6 +199,6 @@ class Comment:
             raise BadRequestException(message="이미 삭제된 댓글입니다.")
         self.deleted_at = datetime.now(timezone.utc)
 
-    def can_modify_or_delete(self, requester_id: uuid.UUID | None, user_role: Role | None) -> bool:
+    def can_modify_or_delete(self, requester_id: int | None, user_role: Role | None) -> bool:
         return _can_modify(self.author, requester_id, user_role)
 # Entities 정의 E

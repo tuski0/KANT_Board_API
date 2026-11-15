@@ -1,7 +1,7 @@
 import re
-import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from enum import StrEnum
 from typing import Literal
 
 from shared.core.exceptions import BadRequestException, ForbiddenException, ValidationException
@@ -15,14 +15,16 @@ PASSWORD_REGEX = re.compile(
 1. 비밀번호는 8자리 이상으로 구성되어야 하며, 특수문자, 숫자, 영어로만 구성되어야 한다.
 2. 이메일은 유효한 형식이어야 하며 로그인시에 사용되므로 중복되서는 안된다.
 3. 이름은 최소 2자 ~ 20자 이내로 구성되어야 한다.
-4. 탈퇴는 소프트 삭제를 기본으로 하며 deleted_at컬럼에 탈퇴한 날짜를 기록하고, 그 여부로 resign 컬럼의 값을 결정한다.
+4. 탈퇴는 소프트 삭제를 기본으로 하며 deleted_at 컬럼에 탈퇴한 날짜를 기록하고, status 컬럼을 WITHDRAWN 으로 바꾼다.
 5. 탈퇴는 본인 또는 관리자 권한(탈퇴를 시킬수 있는)을 가진 사용자만 가능하다.
 """
 
-EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
-PASSWORD_REGEX = re.compile(
-    r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$"
-)
+
+class UserStatus(StrEnum):
+    """회원 상태"""
+    ACTIVE = "ACTIVE"        # 정상
+    WITHDRAWN = "WITHDRAWN"  # 탈퇴
+
 
 @dataclass
 class User:
@@ -31,10 +33,10 @@ class User:
     name: str
     password_hash: str
     role: Literal["USER", "ADMIN"]
-    resign: bool  # 탈퇴 여부
+    status: UserStatus  # 회원 상태 (ACTIVE, WITHDRAWN)
 
     # 기본값이 있는 필드는 아래쪽 위치
-    id: uuid.UUID | None = None
+    id: int | None = None  # DB 자동 증가
     created_at: datetime | None = None
     modified_at: datetime | None = None
     deleted_at: datetime | None = None
@@ -42,6 +44,11 @@ class User:
     def __post_init__(self):
         self._validate_email(self.email)
         self._validate_name(self.name)
+
+    @property
+    def is_withdrawn(self) -> bool:
+        """탈퇴한 회원인지 여부"""
+        return self.status == UserStatus.WITHDRAWN
 
     @classmethod
     def create(
@@ -60,7 +67,7 @@ class User:
             name=name,
             password_hash=password_hash,
             role=role,
-            resign=False,
+            status=UserStatus.ACTIVE,
         )
 
     def change_password(
@@ -70,7 +77,7 @@ class User:
         hasher: PasswordHasher,
     ) -> None:
         """비밀번호 변경 """
-        if self.resign:
+        if self.is_withdrawn:
             raise ForbiddenException(
                 message="탈퇴한 회원은 비밀번호를 변경할 수 없습니다.",
                 error_code="USER_ALREADY_WITHDRAWN",
@@ -99,7 +106,7 @@ class User:
     
     def withdraw(self, requester: "User") -> None:
         """회원 탈퇴 처리 비즈니스 로직"""
-        if self.resign:
+        if self.is_withdrawn:
             raise ValidationException(
                 message="이미 탈퇴 처리된 사용자입니다.",
                 error_code="ALREADY_WITHDRAWN",
@@ -114,7 +121,7 @@ class User:
             )
 
         now = datetime.now(timezone.utc)
-        self.resign = True
+        self.status = UserStatus.WITHDRAWN
         self.deleted_at = now
         self.modified_at = now
 

@@ -1,4 +1,3 @@
-import uuid
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
@@ -22,7 +21,7 @@ class UserResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: uuid.UUID | None = Field(None, description="사용자 식별 고유 ID")
+    id: int | None = Field(None, description="사용자 식별 고유 ID")
     email: str = Field(description="이메일")
     name: str = Field(description="사용자 이름")
     role: str = Field(description="사용자 권한 (USER, ADMIN)")

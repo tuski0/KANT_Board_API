@@ -1,4 +1,3 @@
-import uuid
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from user.domain.repository import UserRepository
@@ -9,7 +8,7 @@ class SqlAlchemyUserRepository(UserRepository):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def find_by_id(self, user_id: uuid.UUID) -> User | None:
+    async def find_by_id(self, user_id: int) -> User | None:
         stmt = select(UserModel).where(UserModel.id == user_id)
         user_model = await self.session.scalar(stmt)
         return user_model.to_user() if user_model else None
@@ -27,7 +26,7 @@ class SqlAlchemyUserRepository(UserRepository):
                 name=user.name,
                 password_hash=user.password_hash,
                 role=user.role,
-                resign=user.resign
+                status=user.status.value,
             )
             self.session.add(user_model)
             await self.session.flush()
@@ -41,7 +40,7 @@ class SqlAlchemyUserRepository(UserRepository):
         if user_model:   
             user_model.name = user.name
             user_model.password_hash = user.password_hash
-            user_model.resign = user.resign
+            user_model.status = user.status.value
             user_model.deleted_at = user.deleted_at
             user_model.modified_at = user.modified_at
 

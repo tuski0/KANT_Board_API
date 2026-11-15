@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated
 from fastapi import Depends, FastAPI
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -56,11 +55,11 @@ async def resolve_optional_user(
     )
 
     payload = await auth_service.authenticate_token(credentials.credentials)
-    user = await user_repo.find_by_id(uuid.UUID(str(payload.user_id)))
+    user = await user_repo.find_by_id(payload.user_id)
 
     if not user:
         raise UnauthorizedException("존재하지 않는 사용자입니다.")
-    if getattr(user, "resign", False):
+    if user.is_withdrawn:
         raise ForbiddenException(
             message="탈퇴한 회원은 서비스를 이용할 수 없습니다.",
             error_code="USER_ALREADY_WITHDRAWN",

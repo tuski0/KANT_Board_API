@@ -1,5 +1,3 @@
-import uuid
-
 from sqlalchemy.exc import IntegrityError
 
 from shared.core.exceptions import ConflictException, NotFoundException
@@ -45,7 +43,7 @@ class UserService:
         admin = User.create(email=email, name=name, raw_password=password, hasher=self.hasher, role="ADMIN")
         return await self.repository.save(admin)
 
-    async def get_user(self, user_id: uuid.UUID) -> User:
+    async def get_user(self, user_id: int) -> User:
         user = await self.repository.find_by_id(user_id)
         if not user:
             raise NotFoundException(message="사용자를 찾을 수 없습니다.", error_code="USER_NOT_FOUND")
@@ -53,7 +51,7 @@ class UserService:
 
     async def change_password(
         self,
-        user_id: uuid.UUID,
+        user_id: int,
         old_password: str,
         new_password: str,
     ) -> None:
@@ -65,7 +63,7 @@ class UserService:
         )
         await self.repository.save(user)
 
-    async def withdraw(self, target_user_id: uuid.UUID, requester: User) -> None:
+    async def withdraw(self, target_user_id: int, requester: User) -> None:
         """회원 탈퇴 (소프트 삭제) - 본인 또는 관리자"""
         user = await self.get_user(target_user_id)
         user.withdraw(requester=requester)

@@ -1,6 +1,4 @@
-import uuid
-
-from sqlalchemy import UUID, BigInteger, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import BigInteger, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from shared.core.models import Base, DateTimeBase
@@ -40,8 +38,8 @@ class PostModel(Base, DateTimeBase):
     # 작성 시점의 회원 이름 (목록에서 조인 없이 표시)
     author_name: Mapped[str] = mapped_column(String(50), nullable=False)
     # 회원만 작성 가능 → NOT NULL. 회원은 소프트 삭제하므로 실제 행 삭제는 RESTRICT로 막음
-    author_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+    author_id: Mapped[int] = mapped_column(
+        BigInteger,
         ForeignKey("users.id", ondelete="RESTRICT"),
         nullable=False,
     )
@@ -62,8 +60,8 @@ class CommentModel(Base, DateTimeBase):
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     author_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    author_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+    author_id: Mapped[int] = mapped_column(
+        BigInteger,
         ForeignKey("users.id", ondelete="RESTRICT"),
         nullable=False,
     )
